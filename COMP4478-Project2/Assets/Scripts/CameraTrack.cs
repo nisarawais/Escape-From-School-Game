@@ -14,6 +14,6 @@ public class CameraTrack : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.position = new Vector3(player.position.x + 6, 0, -10);
+        transform.position = new Vector3(player.position.x + 4, 0, -10);
     }
 }

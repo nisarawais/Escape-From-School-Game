@@ -1,12 +1,30 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.Windows;
 
 public class Player : MonoBehaviour
 {
     //Instance Variables
     [SerializeField] private float maxHealth = 2f;
     private float _health;
+
+    private Rigidbody2D rigidBody;
+    public float speed = 5f;
+    public float speedJump = 10f;
+    public Transform groundCheck;
+    public float groundCheckRadius;
+    public LayerMask groundMask;
+    private bool isTouchingGround;
+
+    private Animator playerAnimation;
+
+    private Vector3 respawnPoint;
+    public GameObject fallDetector;
+
+    public TextMeshProUGUI healthUI;
 
     //public accessor for _health
     public float health
@@ -28,17 +46,52 @@ public class Player : MonoBehaviour
     void Start()
     {
         _health = maxHealth;
+        rigidBody = GetComponent<Rigidbody2D>();
+        playerAnimation = GetComponent<Animator>();
+        UpdateHealth();
+        respawnPoint = transform.position;
+    }
+
+    private void UpdateHealth()
+    {
+        healthUI.SetText("Health: " + _health);
     }
 
     // Update is called once per frame
     void Update()
     {
+        //Movement
+        isTouchingGround = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundMask);
+        float inputX = UnityEngine.Input.GetAxis("Horizontal");
+        if (inputX > 0f)
+        {
+            rigidBody.velocity = new Vector2(inputX * speed, rigidBody.velocity.y);
+            transform.localScale = new Vector2(1f, 1f);
+        } else if(inputX < 0f)
+        {
+            rigidBody.velocity = new Vector2(inputX * speed, rigidBody.velocity.y);
+            transform.localScale = new Vector2(-1f, 1f);
+        } else if (inputX == 0f || Mathf.Abs(rigidBody.velocity.x) < 0.1f)
+        {
+            rigidBody.velocity = new Vector2(0, rigidBody.velocity.y);
+        }
 
+        if (UnityEngine.Input.GetButtonDown("Jump") && isTouchingGround)
+        {
+            rigidBody.velocity = new Vector2(rigidBody.velocity.x, speedJump);
+        }
+        //Player Animations
+        playerAnimation.SetFloat("Speed", Mathf.Abs(rigidBody.velocity.x));
+        playerAnimation.SetFloat("SpeedY", rigidBody.velocity.y);
+        playerAnimation.SetBool("OnGround", isTouchingGround);
+
+        //Move the fall detector with the player
+        fallDetector.transform.position = new Vector2(transform.position.x, fallDetector.transform.position.y);
     }
 
     private void FixedUpdate()
     {
-        //TODO: Movement
+
     }
 
     ///<summary>Heals the player</summary>
@@ -48,6 +101,7 @@ public class Player : MonoBehaviour
         _health += heal;
         _health = Mathf.Min(_health, maxHealth);
         //TODO: update Health UI
+        UpdateHealth();
     }
 
     ///<summary>Damages the player</summary>
@@ -57,11 +111,26 @@ public class Player : MonoBehaviour
         _health -= dmg;
         if (_health <= 0) Die();
         //TODO: update Health UI
+        UpdateHealth();
     }
 
     private void Die()
     {
-        //placeholder, simply freeze game
-        Time.timeScale = 0;
+        transform.position = respawnPoint;
+        Heal(maxHealth);
+        UpdateHealth();
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.tag == "FallDetector")
+        {
+            Die();
+        }
+        if (collision.tag == "LevelEnd")
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+            transform.position = respawnPoint;
+        }
     }
 }
