@@ -230,6 +230,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 43756846}
   m_CullTransparentMesh: 1
+--- !u!195 &89293792 stripped
+NavMeshAgent:
+  m_CorrespondingSourceObject: {fileID: 6813009784782779871, guid: 636c4586042f81144aa76d698b0a8e28, type: 3}
+  m_PrefabInstance: {fileID: 6813009783555377203}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &114732207
 GameObject:
   m_ObjectHideFlags: 0
@@ -6586,6 +6591,7 @@ MonoBehaviour:
   - {fileID: 736022174}
   fullHeart: {fileID: -668020248, guid: 1da823c5edff22a44a0ec5e246f342c0, type: 3}
   emptyHeart: {fileID: -394380216, guid: 1da823c5edff22a44a0ec5e246f342c0, type: 3}
+  professor: {fileID: 89293792}
 --- !u!95 &1320969276
 Animator:
   serializedVersion: 5
@@ -7501,6 +7507,10 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 6813009784782779864, guid: 636c4586042f81144aa76d698b0a8e28, type: 3}
       propertyPath: m_Name
+      value: Professor
+      objectReference: {fileID: 0}
+    - target: {fileID: 6813009784782779864, guid: 636c4586042f81144aa76d698b0a8e28, type: 3}
+      propertyPath: m_TagString
       value: Professor
       objectReference: {fileID: 0}
     - target: {fileID: 6813009784782779868, guid: 636c4586042f81144aa76d698b0a8e28, type: 3}

@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.Windows;
+using UnityEngine.AI;
 
 public class Player : MonoBehaviour
 {
@@ -27,11 +28,11 @@ public class Player : MonoBehaviour
     public GameObject fallDetector;
     private bool gotKey;
 
-    //public TextMeshProUGUI healthUI;
     public int numOfHearts;
     public Image[] hearts;
     public Sprite fullHeart;
     public Sprite emptyHeart;
+
 
     //public accessor for _health
     public float health
@@ -86,25 +87,30 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //Movement
-        isTouchingGround = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundMask);
-        float inputX = UnityEngine.Input.GetAxis("Horizontal");
-        if (inputX > 0f)
+        if (health > 0)
         {
-            rigidBody.velocity = new Vector2(inputX * speed, rigidBody.velocity.y);
-            transform.localScale = new Vector2(1f, 1f);
-        } else if(inputX < 0f)
-        {
-            rigidBody.velocity = new Vector2(inputX * speed, rigidBody.velocity.y);
-            transform.localScale = new Vector2(-1f, 1f);
-        } else if (inputX == 0f || Mathf.Abs(rigidBody.velocity.x) < 0.1f)
-        {
-            rigidBody.velocity = new Vector2(0, rigidBody.velocity.y);
-        }
+            //Movement
+            isTouchingGround = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundMask);
+            float inputX = UnityEngine.Input.GetAxis("Horizontal");
+            if (inputX > 0f)
+            {
+                rigidBody.velocity = new Vector2(inputX * speed, rigidBody.velocity.y);
+                transform.localScale = new Vector2(1f, 1f);
+            }
+            else if (inputX < 0f)
+            {
+                rigidBody.velocity = new Vector2(inputX * speed, rigidBody.velocity.y);
+                transform.localScale = new Vector2(-1f, 1f);
+            }
+            else if (inputX == 0f || Mathf.Abs(rigidBody.velocity.x) < 0.1f)
+            {
+                rigidBody.velocity = new Vector2(0, rigidBody.velocity.y);
+            }
 
-        if (UnityEngine.Input.GetButtonDown("Jump") && isTouchingGround)
-        {
-            rigidBody.velocity = new Vector2(rigidBody.velocity.x, speedJump);
+            if (UnityEngine.Input.GetButtonDown("Jump") && isTouchingGround)
+            {
+                rigidBody.velocity = new Vector2(rigidBody.velocity.x, speedJump);
+            }
         }
         //Player Animations
         playerAnimation.SetFloat("Speed", Mathf.Abs(rigidBody.velocity.x));
@@ -113,6 +119,7 @@ public class Player : MonoBehaviour
 
         //Move the fall detector with the player
         fallDetector.transform.position = new Vector2(transform.position.x, fallDetector.transform.position.y);
+        
     }
 
     private void FixedUpdate()
@@ -126,7 +133,6 @@ public class Player : MonoBehaviour
     {
         _health += heal;
         _health = Mathf.Min(_health, maxHealth);
-        //TODO: update Health UI
         UpdateHealth();
     }
 
@@ -135,14 +141,18 @@ public class Player : MonoBehaviour
     public void Damage(float dmg)
     {
         _health -= dmg;
-        if (_health <= 0) Die();
-        //TODO: update Health UI
+        if (_health <= 0) StartCoroutine("Die");
+        else { playerAnimation.SetTrigger("Hit"); }
         UpdateHealth();
     }
 
-    private void Die()
+    private IEnumerator Die()
     {
-
+        NavMeshAgent agent = GameObject.Find("Professor").GetComponent<NavMeshAgent>();
+        agent.isStopped = true;
+        playerAnimation.SetTrigger("Death");
+        yield return new WaitForSecondsRealtime(3f);
+        agent.isStopped = false;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 ;   }
 
