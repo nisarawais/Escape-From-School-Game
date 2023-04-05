@@ -37,6 +37,11 @@ public class Player : MonoBehaviour
 
     public int levelScore;
 
+    public AudioClip appleGet;
+    public AudioClip bookGet;
+    public AudioClip keysGet;
+    private AudioSource audioSource;
+
     //public accessor for _health
     public float health
     {
@@ -56,6 +61,7 @@ public class Player : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         _health = Manager.health;
         rigidBody = GetComponent<Rigidbody2D>();
         playerAnimation = GetComponent<Animator>();
@@ -111,7 +117,6 @@ public class Player : MonoBehaviour
             {
                 rigidBody.velocity = new Vector2(0, rigidBody.velocity.y);
             }
-
             if (UnityEngine.Input.GetButtonDown("Jump") && isTouchingGround)
             {
                 rigidBody.velocity = new Vector2(rigidBody.velocity.x, speedJump);
@@ -177,12 +182,21 @@ public class Player : MonoBehaviour
         if (collision.CompareTag("Key"))
         {
             gotKey = true;
+            audioSource.clip = keysGet;
+            audioSource.Play();
             GameObject.Destroy(collision.gameObject);
         }
         if (collision.CompareTag("Book"))
         {
             addScore();
+            audioSource.clip = bookGet;
+            audioSource.Play();
             GameObject.Destroy(collision.gameObject);
+        }
+        if (collision.CompareTag("Apple"))
+        {
+            audioSource.clip = appleGet;
+            audioSource.Play();
         }
     }
     public void addScore()

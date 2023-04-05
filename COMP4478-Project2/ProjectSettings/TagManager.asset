@@ -11,6 +11,7 @@ TagManager:
   - Book
   - GameMusic
   - Professor
+  - Apple
   layers:
   - Default
   - TransparentFX
