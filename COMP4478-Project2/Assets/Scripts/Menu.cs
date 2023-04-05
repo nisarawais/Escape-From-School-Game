@@ -24,6 +24,11 @@ public class Menu : MonoBehaviour
 
     public void Rules()
     {
-        SceneManager.LoadScene(3);
+        SceneManager.LoadScene(5);
+    }
+
+        public void Credit()
+    {
+        SceneManager.LoadScene(5);
     }
 }
