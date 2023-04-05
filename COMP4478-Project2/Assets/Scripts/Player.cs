@@ -1,9 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.PlasticSCM.Editor.WebApi;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.Windows;
+using UnityEngine.AI;
 
 public class Player : MonoBehaviour
 {
@@ -23,8 +26,21 @@ public class Player : MonoBehaviour
 
     private Vector3 respawnPoint;
     public GameObject fallDetector;
+    private bool gotKey;
 
-    public TextMeshProUGUI healthUI;
+    public int numOfHearts;
+    public Image[] hearts;
+    public Sprite fullHeart;
+    public Sprite emptyHeart;
+
+    public TextMeshProUGUI BookCounter;
+
+    public int levelScore;
+
+    public AudioClip appleGet;
+    public AudioClip bookGet;
+    public AudioClip keysGet;
+    private AudioSource audioSource;
 
     //public accessor for _health
     public float health
@@ -45,40 +61,66 @@ public class Player : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _health = maxHealth;
+        audioSource = GetComponent<AudioSource>();
+        _health = Manager.health;
         rigidBody = GetComponent<Rigidbody2D>();
         playerAnimation = GetComponent<Animator>();
         UpdateHealth();
         respawnPoint = transform.position;
+        gotKey = false;
+        levelScore = 0;
+        BookCounter.text = Score.score.ToString();
     }
 
     private void UpdateHealth()
     {
-        healthUI.SetText("Health: " + _health);
+        //healthUI.SetText("Health: " + _health);
+        for (int i = 0; i < hearts.Length; i++)
+        {
+            if (i < health)
+            {
+                hearts[i].sprite = fullHeart;
+            } else
+            {
+                hearts[i].sprite = emptyHeart;
+            }
+
+            if (i < numOfHearts)
+            {
+                hearts[i].enabled = true;
+            } else
+            {
+                hearts[i].enabled = false;
+            }
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        //Movement
-        isTouchingGround = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundMask);
-        float inputX = UnityEngine.Input.GetAxis("Horizontal");
-        if (inputX > 0f)
+        if (health > 0)
         {
-            rigidBody.velocity = new Vector2(inputX * speed, rigidBody.velocity.y);
-            transform.localScale = new Vector2(1f, 1f);
-        } else if(inputX < 0f)
-        {
-            rigidBody.velocity = new Vector2(inputX * speed, rigidBody.velocity.y);
-            transform.localScale = new Vector2(-1f, 1f);
-        } else if (inputX == 0f || Mathf.Abs(rigidBody.velocity.x) < 0.1f)
-        {
-            rigidBody.velocity = new Vector2(0, rigidBody.velocity.y);
-        }
-
-        if (UnityEngine.Input.GetButtonDown("Jump") && isTouchingGround)
-        {
-            rigidBody.velocity = new Vector2(rigidBody.velocity.x, speedJump);
+            //Movement
+            isTouchingGround = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundMask);
+            float inputX = UnityEngine.Input.GetAxis("Horizontal");
+            if (inputX > 0f)
+            {
+                rigidBody.velocity = new Vector2(inputX * speed, rigidBody.velocity.y);
+                transform.localScale = new Vector2(1f, 1f);
+            }
+            else if (inputX < 0f)
+            {
+                rigidBody.velocity = new Vector2(inputX * speed, rigidBody.velocity.y);
+                transform.localScale = new Vector2(-1f, 1f);
+            }
+            else if (inputX == 0f || Mathf.Abs(rigidBody.velocity.x) < 0.1f)
+            {
+                rigidBody.velocity = new Vector2(0, rigidBody.velocity.y);
+            }
+            if (UnityEngine.Input.GetButtonDown("Jump") && isTouchingGround)
+            {
+                rigidBody.velocity = new Vector2(rigidBody.velocity.x, speedJump);
+            }
         }
         //Player Animations
         playerAnimation.SetFloat("Speed", Mathf.Abs(rigidBody.velocity.x));
@@ -87,6 +129,7 @@ public class Player : MonoBehaviour
 
         //Move the fall detector with the player
         fallDetector.transform.position = new Vector2(transform.position.x, fallDetector.transform.position.y);
+        
     }
 
     private void FixedUpdate()
@@ -100,7 +143,6 @@ public class Player : MonoBehaviour
     {
         _health += heal;
         _health = Mathf.Min(_health, maxHealth);
-        //TODO: update Health UI
         UpdateHealth();
     }
 
@@ -109,28 +151,65 @@ public class Player : MonoBehaviour
     public void Damage(float dmg)
     {
         _health -= dmg;
-        if (_health <= 0) Die();
-        //TODO: update Health UI
+        if (_health <= 0) StartCoroutine("Die");
+        else { playerAnimation.SetTrigger("Hit"); }
         UpdateHealth();
     }
 
-    private void Die()
+    private IEnumerator Die()
     {
-        transform.position = respawnPoint;
-        Heal(maxHealth);
-        UpdateHealth();
-    }
+        resetScore();
+        NavMeshAgent agent = GameObject.Find("Professor").GetComponent<NavMeshAgent>();
+        agent.isStopped = true;
+        playerAnimation.SetTrigger("Death");
+        yield return new WaitForSecondsRealtime(3f);
+        agent.isStopped = false;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+;   }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.tag == "FallDetector")
+        if (collision.CompareTag("FallDetector"))
         {
             Die();
         }
-        if (collision.tag == "LevelEnd")
+        if (collision.CompareTag("LevelEnd") && gotKey)
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+            Manager.health = _health;
             transform.position = respawnPoint;
         }
+        if (collision.CompareTag("Key"))
+        {
+            gotKey = true;
+            audioSource.clip = keysGet;
+            audioSource.Play();
+            GameObject.Destroy(collision.gameObject);
+        }
+        if (collision.CompareTag("Book"))
+        {
+            addScore();
+            audioSource.clip = bookGet;
+            audioSource.Play();
+            GameObject.Destroy(collision.gameObject);
+        }
+        if (collision.CompareTag("Apple"))
+        {
+            audioSource.clip = appleGet;
+            audioSource.Play();
+        }
+    }
+    public void addScore()
+    {
+        Score.AddScore();
+        levelScore++;
+        BookCounter.text = Score.score.ToString();
+    }
+    public void resetScore()
+    {
+        Score.RemoveScore(levelScore);
+        levelScore = 0;
+        BookCounter.text = Score.score.ToString();
+
     }
 }
