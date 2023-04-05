@@ -24,6 +24,7 @@ public class Player : MonoBehaviour
 
     private Vector3 respawnPoint;
     public GameObject fallDetector;
+    private bool gotKey;
 
     public TextMeshProUGUI healthUI;
 
@@ -51,6 +52,7 @@ public class Player : MonoBehaviour
         playerAnimation = GetComponent<Animator>();
         UpdateHealth();
         respawnPoint = transform.position;
+        gotKey = false;
     }
 
     private void UpdateHealth()
@@ -127,10 +129,15 @@ public class Player : MonoBehaviour
         {
             Die();
         }
-        if (collision.CompareTag("LevelEnd"))
+        if (collision.CompareTag("LevelEnd") && gotKey)
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
             transform.position = respawnPoint;
+        }
+        if (collision.CompareTag("Key"))
+        {
+            gotKey = true;
+            GameObject.Destroy(collision.gameObject);
         }
     }
 }
