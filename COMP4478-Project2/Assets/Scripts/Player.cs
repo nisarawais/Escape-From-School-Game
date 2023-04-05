@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.PlasticSCM.Editor.WebApi;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Windows;
@@ -116,18 +117,17 @@ public class Player : MonoBehaviour
 
     private void Die()
     {
-        transform.position = respawnPoint;
-        Heal(maxHealth);
-        UpdateHealth();
-    }
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+;   }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.tag == "FallDetector")
+        if(collision.CompareTag("FallDetector"))
         {
             Die();
         }
-        if (collision.tag == "LevelEnd")
+        if (collision.CompareTag("LevelEnd"))
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
             transform.position = respawnPoint;
