@@ -53,7 +53,7 @@ public class Player : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _health = maxHealth;
+        _health = Manager.health;
         rigidBody = GetComponent<Rigidbody2D>();
         playerAnimation = GetComponent<Animator>();
         UpdateHealth();
@@ -165,6 +165,7 @@ public class Player : MonoBehaviour
         if (collision.CompareTag("LevelEnd") && gotKey)
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+            Manager.health = _health;
             transform.position = respawnPoint;
         }
         if (collision.CompareTag("Key"))
