@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.PlasticSCM.Editor.WebApi;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.Windows;
 
@@ -26,7 +27,11 @@ public class Player : MonoBehaviour
     public GameObject fallDetector;
     private bool gotKey;
 
-    public TextMeshProUGUI healthUI;
+    //public TextMeshProUGUI healthUI;
+    public int numOfHearts;
+    public Image[] hearts;
+    public Sprite fullHeart;
+    public Sprite emptyHeart;
 
     //public accessor for _health
     public float health
@@ -57,7 +62,25 @@ public class Player : MonoBehaviour
 
     private void UpdateHealth()
     {
-        healthUI.SetText("Health: " + _health);
+        //healthUI.SetText("Health: " + _health);
+        for (int i = 0; i < hearts.Length; i++)
+        {
+            if (i < health)
+            {
+                hearts[i].sprite = fullHeart;
+            } else
+            {
+                hearts[i].sprite = emptyHeart;
+            }
+
+            if (i < numOfHearts)
+            {
+                hearts[i].enabled = true;
+            } else
+            {
+                hearts[i].enabled = false;
+            }
+        }
     }
 
     // Update is called once per frame
