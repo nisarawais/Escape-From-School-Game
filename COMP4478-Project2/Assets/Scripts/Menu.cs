@@ -27,8 +27,8 @@ public class Menu : MonoBehaviour
         SceneManager.LoadScene(5);
     }
 
-        public void Credit()
+    public void Credit()
     {
-        SceneManager.LoadScene(5);
+        SceneManager.LoadScene(6);
     }
 }
