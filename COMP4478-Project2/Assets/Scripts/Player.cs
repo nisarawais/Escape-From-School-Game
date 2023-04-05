@@ -33,6 +33,9 @@ public class Player : MonoBehaviour
     public Sprite fullHeart;
     public Sprite emptyHeart;
 
+    public TextMeshProUGUI BookCounter;
+
+    public int levelScore;
 
     //public accessor for _health
     public float health
@@ -59,6 +62,8 @@ public class Player : MonoBehaviour
         UpdateHealth();
         respawnPoint = transform.position;
         gotKey = false;
+        levelScore = 0;
+        BookCounter.text = Score.score.ToString();
     }
 
     private void UpdateHealth()
@@ -148,6 +153,7 @@ public class Player : MonoBehaviour
 
     private IEnumerator Die()
     {
+        resetScore();
         NavMeshAgent agent = GameObject.Find("Professor").GetComponent<NavMeshAgent>();
         agent.isStopped = true;
         playerAnimation.SetTrigger("Death");
@@ -158,7 +164,7 @@ public class Player : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.CompareTag("FallDetector"))
+        if (collision.CompareTag("FallDetector"))
         {
             Die();
         }
@@ -173,5 +179,23 @@ public class Player : MonoBehaviour
             gotKey = true;
             GameObject.Destroy(collision.gameObject);
         }
+        if (collision.CompareTag("Book"))
+        {
+            addScore();
+            GameObject.Destroy(collision.gameObject);
+        }
+    }
+    public void addScore()
+    {
+        Score.AddScore();
+        levelScore++;
+        BookCounter.text = Score.score.ToString();
+    }
+    public void resetScore()
+    {
+        Score.RemoveScore(levelScore);
+        levelScore = 0;
+        BookCounter.text = Score.score.ToString();
+
     }
 }
