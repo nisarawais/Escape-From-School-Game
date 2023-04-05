@@ -362,10 +362,10 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.043003082, y: 1.0052189}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -376,7 +376,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1.0860062, y: 3.0104377}
   m_EdgeRadius: 0
 --- !u!4 &69722735 stripped
 Transform:
@@ -773,6 +773,10 @@ PrefabInstance:
     - target: {fileID: 5644884852974936526, guid: 681af6c885d73cb4b80b4ad982b84692, type: 3}
       propertyPath: m_Name
       value: ParallaxBackground
+      objectReference: {fileID: 0}
+    - target: {fileID: 5644884852974936526, guid: 681af6c885d73cb4b80b4ad982b84692, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5644884853730377775, guid: 681af6c885d73cb4b80b4ad982b84692, type: 3}
       propertyPath: m_Sprite
@@ -8339,7 +8343,7 @@ MonoBehaviour:
   speed: 7
   speedJump: 16
   groundCheck: {fileID: 1041050813}
-  groundCheckRadius: 0.2
+  groundCheckRadius: 0.3
   groundMask:
     serializedVersion: 2
     m_Bits: 512
